@@ -1,16 +1,108 @@
-var synth = function(){
-    this.notesPlaying = [];
+let synth = function (config) {
+
+    this.instrumentName = 'Synth101';
+    this.instrumentID = config.instrumentID || Date.now();
+    this.context = config.context;
+    this.gainNode = this.context.createGain();
+    this.notes = {};
+
+    this.controls = [
+        {label: 'Tune', type: 'knob', value: 64},
+        {label: 'Cutoff', type: 'knob', value: 64},
+        {label: 'Resonance', type: 'knob', value: 64},
+    ];
+
     this.init();
+
+    console.log(this.instrumentName + ' Created - Id: ' + this.instrumentID);
+
 };
 
-synth.prototype.init = function(){
-    console.log('Synth init');
-}
+synth.prototype = {
 
-synth.prototype.playNote = function(noteNumber){
-    console.log('Play note');
-}
+    init: function () {
 
-synth.prototype.stopNote = function(noteNumber){
-    console.log('Stop note');
-}
+        //Set master volume of this instrument
+        this.gainNode.gain.value = 0.3;
+        this.gainNode.connect(this.context.destination);
+
+        //Set initial values of all controls
+        this.initControlValues();
+
+    },
+
+    //-------
+
+    initControlValues: function () {
+        for (let i = 0; i < this.controls.length; i++) {
+            this.setControlValue(i, this.controls[i].value);
+        }
+    },
+
+    //-------
+
+    setControlValue: function (id, value) {
+        this.controls[id].value = value;
+
+        switch (id) {
+            case 0:
+                //Tune
+
+                break;
+            case 1:
+                //Set cutoff
+
+                break;
+            case 1:
+                //Set Res
+
+                break;
+        }
+    },
+
+    //-------
+
+    connectNodes: function () {
+
+    },
+
+    //-------
+
+    noteOn: function (noteNumber, velocity) {
+        let frequency = app.midiNoteToFrequency(noteNumber);
+        let startTime = this.context.currentTime;
+
+        //Array of 2 oscillators
+        this.notes[noteNumber] = [
+            this.context.createOscillator(),
+            this.context.createOscillator(),
+        ];
+
+        //Loop through the 2 oscillators
+        for (let key in this.notes[noteNumber]) {
+
+            //Set values of oscillator
+            this.notes[noteNumber][key].frequency.value = frequency;
+            this.notes[noteNumber][key].type = 'sawtooth';
+
+            //Tuning for second oscillator
+            if (key > 0) {
+                this.notes[noteNumber][key].detune.value = 6;
+            }
+
+            //Connect the oscillator to the gain node and start playing
+            this.notes[noteNumber][key].connect(this.gainNode);
+            this.notes[noteNumber][key].start(startTime);
+
+        }
+
+    },
+
+    //-------
+
+    noteOff: function (noteNumber) {
+        this.notes[noteNumber][0].stop(this.context.currentTime);
+        this.notes[noteNumber][1].stop(this.context.currentTime);
+    }
+
+};

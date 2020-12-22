@@ -5,17 +5,17 @@ let ui = {
 
     init: function() {
         this.eventListeners();
-        this.handlebarHelpers();
+        this.handlebarsHelpers();
     },
 
     eventListeners: function() {
         let self = this;
 
         $(document)
-            .onkeydown(function(e) {
+            .keydown(function(e) {
                 self.keyDown(e);
             })
-            .onkeyup(function(e) {
+            .keyup(function(e) {
                 self.keyUp(e);
             })
     },
@@ -24,21 +24,28 @@ let ui = {
 
     },
 
+    // Capture all press events
     keyDown: function(e) {
+        //e.preventDefault();
+
         let keyCode = e.which;
         if (this.keysDown[keyCode]) {
             return;
         }
 
-        this.keysDown[keyCode] = true;
-
         let midiNote = this.keyCodeToMidiNote(keyCode);
-        console.log(midiNote);
+
+        if (midiNote) {
+            this.keysDown[keyCode] = midiNote;
+            app.instruments[app.currentInstrumentID].noteOn(midiNote, 127);
+        }
     },
 
     keyUp: function(e) {
         let keyCode = e.which;
         if (this.keysDown[keyCode]) {
+            let midiNote = this.keysDown[keyCode];
+            app.instruments[app.currentInstrumentID].noteOff(midiNote);
             this.keysDown[keyCode] = false;
         }
     },
@@ -57,10 +64,30 @@ let ui = {
             78: 9,
             74: 10,
             77: 11,
+            //Next octave
+            81: 12,
+            50: 13,
+            87: 14,
+            51: 15,
+            69: 16,
+            82: 17,
+            53: 18,
+            84: 19,
+            54: 20,
+            89: 21,
+            55: 22,
+            85: 23,
+            //Next octave
+            73: 24,
+            57: 25,
+            79: 26,
+            48: 27,
+            80: 28
         };
 
         if (mappings[keyCode] !== undefined) {
-            return mappings[keyCode];
+            let midiNote = mappings[keyCode] + (app.keyboardOctave*12);
+            return midiNote;
         } else {
             return false;
         }
