@@ -5,6 +5,11 @@ let synth = function (config) {
     this.context = config.context;
     this.gainNode = this.context.createGain();
     this.notes = {};
+    this.polyphony = 8;
+
+    this.oscNodes = [];
+    this.ampNodes = [];
+    this.filterNodes = [];
 
     this.controls = [
         {label: 'Tune', type: 'knob', value: 64},
@@ -22,13 +27,33 @@ synth.prototype = {
 
     init: function () {
 
-        //Set master volume of this instrument
+        //Set master volume of this instrument connect gain
         this.gainNode.gain.value = 0.3;
         this.gainNode.connect(this.context.destination);
+
+        this.createNodes();
 
         //Set initial values of all controls
         this.initControlValues();
 
+    },
+
+    //-------
+
+    createNodes: function() {
+
+        // Loop through this voices count (polyphony) and create oscillator, filter and gain nodes
+        for (let i = 0; i < this.polyphony; i++) {
+            // 2 Oscillators for each voice
+            let voice = [this.context.createOscillator(), this.context.createOscillator()];
+
+            let amp = this.context.createGain();
+            let filter = this.context.createBiquadFilter();
+
+            this.oscNodes.push(voice);
+            this.ampNodes.push(amp);
+            this.filterNodes.push(filter);
+        }
     },
 
     //-------
@@ -47,15 +72,12 @@ synth.prototype = {
         switch (id) {
             case 0:
                 //Tune
-
                 break;
             case 1:
                 //Set cutoff
-
                 break;
             case 1:
                 //Set Res
-
                 break;
         }
     },
