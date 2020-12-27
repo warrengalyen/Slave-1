@@ -16,10 +16,30 @@ let synth = function (config) {
     this.filterNodes = [];
 
     this.controls = [
-        {label: 'Tune', type: 'knob', value: 64},
-        {label: 'Cutoff', type: 'knob', value: 64},
-        {label: 'Resonance', type: 'knob', value: 64},
+        {label: 'Amplitude Attack', type: 'knob', value: 64},
+        {label: 'Amplitude Decay', type: 'knob', value: 64},
+        {label: 'Amplitude Sustain', type: 'knob', value: 64},
+        {label: 'Amplitude Release', type: 'knob', value: 64},
+        {label: 'Filter Attack', type: 'knob', value: 64},
+        {label: 'Filter Decay', type: 'knob', value: 64},
+        {label: 'Filter Sustain', type: 'knob', value: 64},
+        {label: 'Filter Release', type: 'knob', value: 64},
     ];
+
+    //Control values
+    this.ampEnv = {
+        attack: 0,
+        decay: 0,
+        sustain: 0,
+        release: 0,
+    };
+
+    this.filtEnv = {
+        attack: 0,
+        decay: 0,
+        sustain: 0,
+        release: 0,
+    };
 
     this.init();
 
@@ -115,19 +135,49 @@ synth.prototype = {
     setControlValue: function (id, value) {
         this.controls[id].value = value;
 
+        console.log(this.controls[id].label + ' - ' + value);
+
+        //Convert midi value to percentage
+        let valuePercent = (value / 127) * 100;
+
         switch (id) {
             case 0:
-                //Tune
+                //Amp attack
+                let minAttack = 0.001;
+                let maxAttack = 8;
+                let attackTime = (maxAttack / 100) * valuePercent;
+                for (let i = 0; i < this.polyphony; i++) {
+                    this.ampEnv.attack = attackTime + minAttack;
+                }
                 break;
             case 1:
-                //Set cutoff
+                //Amp decay
                 break;
-            case 1:
-                //Set Res
+            case 2:
+                //Amp sustain
+
+                break;
+            case 3:
+                //Amp release
+
+                break;
+            case 4:
+                //Filter attack
+
+                break;
+            case 5:
+                //Filter decay
+
+                break;
+            case 6:
+                //Filter sustain
+
+                break;
+            case 7:
+                //Filter release
+
                 break;
         }
-        ;
-
     },
 
     //-------
@@ -154,7 +204,7 @@ synth.prototype = {
         let filterNode = this.filterNodes[currentVoice];
 
 
-        //Set frequecy of the 2 oscillators for this voice
+        //Set frequency of the 2 oscillators for this voice
         let oscNode;
         for (let i = 0; i < this.oscsPerVoice; i++) {
             oscNode = this.oscNodes[currentVoice][i];
@@ -170,7 +220,7 @@ synth.prototype = {
         //ampNode.gain.setValueAtTime(0, startTime);
         ampNode.gain.cancelScheduledValues(startTime);
         ampNode.gain.linearRampToValueAtTime(0, startTime + 0.01);
-        ampNode.gain.linearRampToValueAtTime(1, startTime + 0.05);
+        ampNode.gain.linearRampToValueAtTime(1, startTime + this.ampEnv.attack);
 
         //Filter envelope
         filterNode.frequency.cancelScheduledValues(startTime);
@@ -193,7 +243,8 @@ synth.prototype = {
 
         let currentTime = this.context.currentTime;
 
-        //this.ampNodes[voice].gain.cancelScheduledValues(currentTime);
+        //this.ampNodes[voice].gain.value = this.ampNodes[voice].gain.value;
+        this.ampNodes[voice].gain.cancelScheduledValues(currentTime);
         this.ampNodes[voice].gain.exponentialRampToValueAtTime(0.000001, currentTime + 6);
 
         this.filterNodes[voice].frequency.exponentialRampToValueAtTime(0.000001, currentTime + 4);

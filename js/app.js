@@ -34,6 +34,20 @@ let app = {
             instrumentID: instrumentID,
             context: app.context
         });
+
+        //Add the UI template for this instrument
+        $.get('js/' + instrumentName + '.view.html', function(template){
+
+            //Use handlebars to replace placeholders within template
+            var instrumentTemplateData = {
+                instrumentID: instrumentID,
+            };
+            var instrumentTemplate = Handlebars.compile(template);
+            var instrumentHtml = instrumentTemplate(instrumentTemplateData);
+
+            $('#instruments-container').append(instrumentHtml);
+        });
+
         return instrumentID;
 
     },

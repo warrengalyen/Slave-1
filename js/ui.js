@@ -18,6 +18,10 @@ let ui = {
             .keyup(function(e) {
                 self.keyUp(e);
             })
+
+            .on('input', '.js-control-knob', function(){
+                console.log('Param change');
+            })
     },
 
     handlebarsHelpers: function() {
@@ -27,6 +31,11 @@ let ui = {
     // Capture all press events
     keyDown: function(e) {
         //e.preventDefault();
+
+        let instrumentID = $(this).data('instrument-id');
+        let controlID = $(this).data('control-id');
+        let value = $(this).val();
+        app.instruments[instrumentID].setControlValue(controlID, value);
 
         let keyCode = e.which;
         if (this.keysDown[keyCode]) {
@@ -82,7 +91,11 @@ let ui = {
             57: 25,
             79: 26,
             48: 27,
-            80: 28
+            80: 28,
+            219: 29,
+            187: 30,
+            221: 31,
+            222: 32
         };
 
         if (mappings[keyCode] !== undefined) {
