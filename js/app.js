@@ -39,11 +39,11 @@ let app = {
         $.get('js/' + instrumentName + '.view.html', function(template){
 
             //Use handlebars to replace placeholders within template
-            var instrumentTemplateData = {
+            let instrumentTemplateData = {
                 instrumentID: instrumentID,
             };
-            var instrumentTemplate = Handlebars.compile(template);
-            var instrumentHtml = instrumentTemplate(instrumentTemplateData);
+            let instrumentTemplate = Handlebars.compile(template);
+            let instrumentHtml = instrumentTemplate(instrumentTemplateData);
 
             $('#instruments-container').append(instrumentHtml);
         });
