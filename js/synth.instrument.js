@@ -1,4 +1,4 @@
-var synth = function (config) {
+var synth = function(config){
 
     this.instrumentName = 'Synth101';
     this.instrumentID = config.instrumentID || Date.now();
@@ -15,6 +15,8 @@ var synth = function (config) {
     this.ampNodes = [];
     this.filterNodes = [];
     this.filterMaxFreq = 3000;
+
+    this.masterVolume = 0.09;
 
     this.controls = [
         {label: 'Amplitude Attack', type: 'knob', value: 64},
@@ -51,10 +53,10 @@ var synth = function (config) {
 
 synth.prototype = {
 
-    init: function () {
+    init: function(){
 
         //Set master volume of this instrument connect gain
-        this.masterGainNode.gain.value = 0.3;
+        this.masterGainNode.gain.value = this.masterVolume;
 
         this.createNodes();
         this.connectNodes();
@@ -63,7 +65,7 @@ synth.prototype = {
         this.initControlValues();
 
         var self = this;
-        window.requestAnimationFrame(function render() {
+        window.requestAnimationFrame(function render(){
             self.animate();
             window.requestAnimationFrame(render);
         });
@@ -72,10 +74,10 @@ synth.prototype = {
 
     //-------
 
-    createNodes: function () {
+    createNodes: function(){
 
         //Loop through the voices count (polyphony) and create oscillator, filter and gain nodes
-        for (var i = 0; i < this.polyphony; i++) {
+        for(var i=0; i<this.polyphony; i++){
 
             //2 Osc's for each voice
             var voice = [
@@ -84,7 +86,7 @@ synth.prototype = {
             ];
 
             //Start oscs playing
-            for (var key in voice) {
+            for(var key in voice){
                 voice[key].start();
             }
 
@@ -107,10 +109,10 @@ synth.prototype = {
 
     //-------
 
-    connectNodes: function () {
+    connectNodes: function(){
 
         //Loop through each voice and connect the nodes together
-        for (var i = 0; i < this.polyphony; i++) {
+        for(var i=0; i<this.polyphony; i++){
 
             //Connect the 2 osc nodes for this voice to the voice amp (gain) node
             this.oscNodes[i][0].connect(this.ampNodes[i]);
@@ -132,15 +134,15 @@ synth.prototype = {
 
     //-------
 
-    initControlValues: function () {
-        for (var i = 0; i < this.controls.length; i++) {
+    initControlValues: function(){
+        for(var i=0; i<this.controls.length; i++){
             this.setControlValue(i, this.controls[i].value);
         }
     },
 
     //-------
 
-    setControlValue: function (id, value) {
+    setControlValue: function(id, value){
         this.controls[id].value = value;
 
         console.log(this.controls[id].label + ' - ' + value);
@@ -148,13 +150,13 @@ synth.prototype = {
         //Convert midi value to percentage
         var valuePercent = (value / 127) * 100;
 
-        switch (id) {
+        switch(id){
             case 0:
                 //Amp attack
                 var minAttack = 0.001;
                 var maxAttack = 8;
                 var attackTime = (maxAttack / 100) * valuePercent;
-                for (var i = 0; i < this.polyphony; i++) {
+                for(var i=0; i<this.polyphony; i++){
                     this.ampEnv.attack = attackTime + minAttack;
                 }
                 break;
@@ -171,7 +173,7 @@ synth.prototype = {
                 var minRelease = 0.001;
                 var maxRelease = 8;
                 var releaseTime = (maxRelease / 100) * valuePercent;
-                for (var i = 0; i < this.polyphony; i++) {
+                for(var i=0; i<this.polyphony; i++){
                     this.ampEnv.release = releaseTime + minRelease;
                 }
                 break;
@@ -180,7 +182,7 @@ synth.prototype = {
                 var minAttack = 0.001;
                 var maxAttack = 8;
                 var attackTime = (maxAttack / 100) * valuePercent;
-                for (var i = 0; i < this.polyphony; i++) {
+                for(var i=0; i<this.polyphony; i++){
                     this.filtEnv.attack = attackTime + minAttack;
                 }
                 break;
@@ -197,45 +199,57 @@ synth.prototype = {
                 var minRelease = 0.001;
                 var maxRelease = 8;
                 var releaseTime = (maxRelease / 100) * valuePercent;
-                for (var i = 0; i < this.polyphony; i++) {
+                for(var i=0; i<this.polyphony; i++){
                     this.filtEnv.release = releaseTime + minRelease;
                 }
                 break;
-        }
-        ;
+        };
 
     },
 
     //-------
 
     //Find the next free voice to use - sequential, unless a key is still pressed and using that voice
-    getVoice: function () {
-        console.log('getvoice');
-        var voice = this.lastVoice + 1;
-        if (voice > this.polyphony - 1) {
-            voice = 0;
-        }
+    getVoice: function(){
+
         var self = this;
 
-        /*
-        function checkActive(voice){
+        function voiceFree(voice){
+            var free = true;
             for(var key in self.noteVoiceLog){
                 if(self.noteVoiceLog[key] == voice){
-                    self.lastVoice++;
-                    voice = self.getVoice();
+                    free = false;
                 }
             }
+            return free;
         }
 
-        voice = checkActive(voice);
-        */
+        //Select the next voice
+        var voice = this.lastVoice + 1;
+        if(voice > this.polyphony-1){
+            voice = 0;
+        }
+        for(var i=0; i<this.polyphony; i++){
+
+            //Check if the voice is free - use this voice if so
+            //Otherwise continue in loop and check if next voice is free
+            if(voiceFree(voice)){
+                break;
+            } else {
+                voice++;
+                if(voice > this.polyphony-1){
+                    voice = 0;
+                }
+            }
+
+        }
 
         return voice;
     },
 
     //-------
 
-    noteOn: function (noteNumber, velocity) {
+    noteOn: function(noteNumber, velocity){
 
         //Select a voice to use
         var currentVoice = this.getVoice();
@@ -257,12 +271,12 @@ synth.prototype = {
 
         //Set frequecy of the 2 oscillators for this voice
         var oscNode;
-        for (var i = 0; i < this.oscsPerVoice; i++) {
+        for(var i=0; i<this.oscsPerVoice; i++){
             oscNode = this.oscNodes[currentVoice][i];
-            oscNode.frequency.setValueAtTime(frequency, startTime + 0.01);
+            oscNode.frequency.setValueAtTime(frequency, startTime+ 0.01);
             oscNode.type = 'sawtooth';
             //Tuning for second osc
-            if (i == 1) {
+            if(i ==1){
                 oscNode.detune.value = 6;
             }
         }
@@ -283,9 +297,9 @@ synth.prototype = {
 
     //-------
 
-    noteOff: function (noteNumber) {
+    noteOff: function(noteNumber){
         //Find which voice was assigned to this note in the log
-        if (typeof this.noteVoiceLog[noteNumber] == undefined) {
+        if( typeof this.noteVoiceLog[noteNumber] == undefined){
             console.log('Could not find which voice is used for note: ' + noteNumber);
             return;
         }
@@ -313,13 +327,14 @@ synth.prototype = {
     //-------
 
 
-    animate: function () {
+
+    animate: function(){
         var gainValue, gainPercent, filtValue, filtPercent;
-        for (var key in this.ampNodes) {
+        for(var key in this.ampNodes){
             gainValue = this.ampNodes[key].gain.value;
             gainPercent = Math.floor(gainValue * 100);
             filtValue = this.filterNodes[key].frequency.value;
-            filtPercent = Math.floor((filtValue / this.filterMaxFreq) * 100)
+            filtPercent = Math.floor( (filtValue / this.filterMaxFreq) * 100)
 
             $('.js-voice-level[data-id="' + key + '"] div').height(gainPercent + '%');
             $('.js-voice-filter[data-id="' + key + '"] div').height(filtPercent + '%');
