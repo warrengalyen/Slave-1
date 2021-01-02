@@ -28,6 +28,8 @@ let app = {
     //Create a new instrument object
     addInstrument: function (instrumentName) {
 
+        let self = this;
+
         //Create an id for this instrument
         let instrumentID = Date.now();
         this.instruments[instrumentID] = new window[instrumentName]({
@@ -46,10 +48,24 @@ let app = {
             let instrumentHtml = instrumentTemplate(instrumentTemplateData);
 
             $('#instruments-container').append(instrumentHtml);
+
+            //Set initial visual control positions
+            self.updateInstrumentVisualControls(instrumentID);
         });
 
         return instrumentID;
 
+    },
+
+    //----------------------
+
+    updateInstrumentVisualControls: function(instrumentID){
+        let controls = this.instruments[instrumentID].controls;
+        console.log(controls);
+        for(let i in controls){
+            let percentVal = Math.round( (controls[i].value / 127) * 100 );
+            $('.js-control-knob[data-instrument-id="' + instrumentID + '"][data-control-id="' + i + '"]').val(percentVal);
+        }
     },
 
     //----------------------
