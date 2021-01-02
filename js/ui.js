@@ -1,66 +1,120 @@
-let ui = {
+var ui = {
 
-    // Keep track of which keys are pressed (stops re-triggering)
+    //Keep track of which keys are pressed (stops re-triggering)
     keysDown: [],
 
-    init: function() {
+    //-------------------
+
+    init: function(){
         this.eventListeners();
         this.handlebarsHelpers();
     },
 
-    eventListeners: function() {
-        let self = this;
+    //-------------------
+
+    eventListeners: function(){
+
+        var self = this;
 
         $(document)
-            .keydown(function(e) {
+            .keydown(function(e){
                 self.keyDown(e);
             })
-            .keyup(function(e) {
+            .keyup(function(e){
                 self.keyUp(e);
             })
 
+            //Adjust instrument control
             .on('input', '.js-control-knob', function(){
-                console.log('Param change');
+
+                var controlID = $(this).data('control-id');
+                var value = $(this).val();
+
+                //Convert percent value to midi value
+                var midiValue = Math.round((127 / 100) * value);
+
+                //Pass the control id and midi value to the instrument
+                app.synth.setControlValue(controlID, midiValue);
+
             })
+
+            .on('mousedown', '.js-preset-select', function(){
+                var presetID = $(this).data('preset-id');
+                app.synth.loadPreset(presetID);
+                ui.updateSynthVisualControls();
+                //ui.highlightPreset(presetID);
+            })
+        ;
+
     },
 
-    handlebarsHelpers: function() {
+    //-------------
+
+    highlightPreset: function(presetID){
+        $('.preset-selected').removeClass('preset-selected');
+        $('.js-preset-select[data-preset-id="' + presetID + '"]').addClass('preset-selected');
+    },
+
+    //-------------
+
+    handlebarsHelpers: function(){
+
+        /*
+		Handlebars.registerHelper('simpleLoop', function(n, block) {
+		    var accum = '';
+		    for(var i = 0; i < n; ++i)
+		        accum += block.fn(i);
+		    return accum;
+		});
+		Handlebars.registerHelper('isEqual', function(a, b, opts){
+			if(a===b){
+				return opts.fn(this);
+			} else{
+				return opts.inverse(this);
+			}
+		});
+        */
 
     },
 
-    // Capture all press events
-    keyDown: function(e) {
+    //-------------------
+
+    //Capture all press events
+    keyDown: function(e){
         //e.preventDefault();
 
-        let instrumentID = $(this).data('instrument-id');
-        let controlID = $(this).data('control-id');
-        let value = $(this).val();
-        app.instruments[instrumentID].setControlValue(controlID, value);
+        console.log(e.which);
 
-        let keyCode = e.which;
-        if (this.keysDown[keyCode]) {
+        var keyCode = e.which;
+        if(this.keysDown[keyCode]){
             return;
         }
 
-        let midiNote = this.keyCodeToMidiNote(keyCode);
+        var midiNote = this.keyCodeToMidiNote(keyCode);
 
-        if (midiNote) {
+        if(midiNote){
             this.keysDown[keyCode] = midiNote;
-            app.instruments[app.currentInstrumentID].noteOn(midiNote, 127);
+            app.synth.noteOn(midiNote, 127);
         }
+
     },
 
-    keyUp: function(e) {
-        let keyCode = e.which;
-        if (this.keysDown[keyCode]) {
-            let midiNote = this.keysDown[keyCode];
-            app.instruments[app.currentInstrumentID].noteOff(midiNote);
+    //-------------------
+
+    keyUp: function(e){
+        var keyCode = e.which;
+        if(this.keysDown[keyCode]){
+            var midiNote = this.keysDown[keyCode];
+            app.synth.noteOff(midiNote);
             this.keysDown[keyCode] = false;
         }
     },
 
-    keyCodeToMidiNote: function(keyCode) {
-        let mappings = {
+    //-------------------
+
+    keyCodeToMidiNote: function(keyCode){
+
+        var mappings = {
             90: 0,
             83: 1,
             88: 2,
@@ -98,11 +152,27 @@ let ui = {
             222: 32
         };
 
-        if (mappings[keyCode] !== undefined) {
-            let midiNote = mappings[keyCode] + (app.keyboardOctave*12);
+        if(mappings[keyCode] !== undefined){
+            var midiNote = mappings[keyCode] + (app.keyboardOctave*12);
             return midiNote;
         } else {
             return false;
         }
+
     },
+
+    //----------------------
+
+    updateSynthVisualControls: function(){
+        var controls = app.synth.controls;
+        var presetID = app.synth.currentPreset;
+        for(var i in controls){
+            var percentVal = Math.round( (controls[i].value / 127) * 100 );
+            $('.js-control-knob[data-control-id="' + i + '"]').val(percentVal);
+        }
+
+        this.highlightPreset(presetID);
+
+    },
+
 };

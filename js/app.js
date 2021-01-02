@@ -1,92 +1,56 @@
-let app = {
+var app = {
 
     //Web audio context (Pass in to instruments)
     context: new (window.AudioContext || window.webkitAudioContext)(),
-
     keyboardOctave: 3,
-
-    //Container for instruments
-    instruments: {},
-
-    //ID of the current instrument that will receive user input
-    currentInstrumentID: null,
+    synth: null,
 
     //----------------------
 
-    init: function () {
-
-        //Create the synth instrument
-        app.currentInstrumentID = this.addInstrument('synth');
-
-        //Init the UI
+    init: function(){
+        //Init the main UI and create the synth
         ui.init();
-
+        app.createSynth();
     },
 
     //----------------------
 
     //Create a new instrument object
-    addInstrument: function (instrumentName) {
+    createSynth: function(){
 
-        let self = this;
-
-        //Create an id for this instrument
-        let instrumentID = Date.now();
-        this.instruments[instrumentID] = new window[instrumentName]({
-            instrumentID: instrumentID,
+        app.synth = new synth({
             context: app.context
         });
 
-        let instrument = this.instruments[instrumentID];
+        //Load the UI template for the synth
+        $.get('js/synth.view.html', function(template){
 
-        //Add the UI template for this instrument
-        $.get('js/' + instrumentName + '.view.html', function (template) {
-
-            //Get the preset names from the instrument to include in the UI
-            let presets = [];
-            if (instrument.presets) {
-                for (let key in instrument.presets) {
-                    presets.push(instrument.presets[key].name);
-                }
-            }
-
+            //Get the preset names to include in the UI
+            var presets = app.synth.presets;
 
             //Use handlebars to replace placeholders within template
-            let instrumentTemplateData = {
-                instrumentID: instrumentID,
+            var instrumentTemplateData = {
                 presets: presets
             };
-            let instrumentTemplate = Handlebars.compile(template);
-            let instrumentHtml = instrumentTemplate(instrumentTemplateData);
+            var instrumentTemplate = Handlebars.compile(template);
+            var instrumentHtml = instrumentTemplate(instrumentTemplateData);
 
             $('#instruments-container').append(instrumentHtml);
 
             //Set initial visual control positions
-            self.updateInstrumentVisualControls(instrumentID);
+            ui.updateSynthVisualControls();
+
         });
 
-        return instrumentID;
-
-    },
-
-    //----------------------
-
-    updateInstrumentVisualControls: function (instrumentID) {
-        let controls = this.instruments[instrumentID].controls;
-        console.log(controls);
-        for (let i in controls) {
-            let percentVal = Math.round((controls[i].value / 127) * 100);
-            $('.js-control-knob[data-instrument-id="' + instrumentID + '"][data-control-id="' + i + '"]').val(percentVal);
-        }
     },
 
     //----------------------
 
     //Receive a midi note number, return frequency
-    midiNoteToFrequency: function (noteNumber) {
-        let tuningFrequency = 440;
-        let tuningNote = 69;
-        return Math.exp((noteNumber - tuningNote) * Math.log(2) / 12) * tuningFrequency;
+    midiNoteToFrequency: function(noteNumber){
+        var tuningFrequency = 440;
+        var tuningNote = 69;
+        return Math.exp ((noteNumber-tuningNote) * Math.log(2) / 12) * tuningFrequency;
     },
 
 };
