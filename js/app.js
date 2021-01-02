@@ -37,12 +37,24 @@ let app = {
             context: app.context
         });
 
+        let instrument = this.instruments[instrumentID];
+
         //Add the UI template for this instrument
-        $.get('js/' + instrumentName + '.view.html', function(template){
+        $.get('js/' + instrumentName + '.view.html', function (template) {
+
+            //Get the preset names from the instrument to include in the UI
+            let presets = [];
+            if (instrument.presets) {
+                for (let key in instrument.presets) {
+                    presets.push(instrument.presets[key].name);
+                }
+            }
+
 
             //Use handlebars to replace placeholders within template
             let instrumentTemplateData = {
                 instrumentID: instrumentID,
+                presets: presets
             };
             let instrumentTemplate = Handlebars.compile(template);
             let instrumentHtml = instrumentTemplate(instrumentTemplateData);
@@ -59,11 +71,11 @@ let app = {
 
     //----------------------
 
-    updateInstrumentVisualControls: function(instrumentID){
+    updateInstrumentVisualControls: function (instrumentID) {
         let controls = this.instruments[instrumentID].controls;
         console.log(controls);
-        for(let i in controls){
-            let percentVal = Math.round( (controls[i].value / 127) * 100 );
+        for (let i in controls) {
+            let percentVal = Math.round((controls[i].value / 127) * 100);
             $('.js-control-knob[data-instrument-id="' + instrumentID + '"][data-control-id="' + i + '"]').val(percentVal);
         }
     },
