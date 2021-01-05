@@ -5,27 +5,27 @@ var ui = {
 
     //-------------------
 
-    init: function(){
+    init: function () {
         this.eventListeners();
         this.handlebarsHelpers();
     },
 
     //-------------------
 
-    eventListeners: function(){
+    eventListeners: function () {
 
         var self = this;
 
         $(document)
-            .keydown(function(e){
+            .keydown(function (e) {
                 self.keyDown(e);
             })
-            .keyup(function(e){
+            .keyup(function (e) {
                 self.keyUp(e);
             })
 
             //Adjust instrument control
-            .on('input', '.js-control-knob', function(){
+            .on('input', '.js-control-knob', function () {
 
                 var controlID = $(this).data('control-id');
                 var value = $(this).val();
@@ -38,14 +38,15 @@ var ui = {
 
             })
 
-            .on('mousedown', '.js-control-radio-button', function(){
+            .on('mousedown', '.js-control-radio-button', function () {
+                console.log('radio click');
                 var controlID = $(this).data('control-id');
                 var value = $(this).data('value');
                 app.synth.setControlValue(controlID, value);
                 ui.updateSynthVisualControls();
             })
 
-            .on('mousedown', '.js-preset-select', function(){
+            .on('mousedown', '.js-preset-select', function () {
                 var presetID = $(this).data('preset-id');
                 app.synth.loadPreset(presetID);
                 ui.updateSynthVisualControls();
@@ -57,14 +58,14 @@ var ui = {
 
     //-------------
 
-    highlightPreset: function(presetID){
+    highlightPreset: function (presetID) {
         $('.preset-selected').removeClass('preset-selected');
         $('.js-preset-select[data-preset-id="' + presetID + '"]').addClass('preset-selected');
     },
 
     //-------------
 
-    handlebarsHelpers: function(){
+    handlebarsHelpers: function () {
 
         /*
 		Handlebars.registerHelper('simpleLoop', function(n, block) {
@@ -87,19 +88,19 @@ var ui = {
     //-------------------
 
     //Capture all press events
-    keyDown: function(e){
+    keyDown: function (e) {
         //e.preventDefault();
 
         console.log(e.which);
 
         var keyCode = e.which;
-        if(this.keysDown[keyCode]){
+        if (this.keysDown[keyCode]) {
             return;
         }
 
         var midiNote = this.keyCodeToMidiNote(keyCode);
 
-        if(midiNote){
+        if (midiNote) {
             this.keysDown[keyCode] = midiNote;
             app.synth.noteOn(midiNote, 127);
         }
@@ -108,9 +109,9 @@ var ui = {
 
     //-------------------
 
-    keyUp: function(e){
+    keyUp: function (e) {
         var keyCode = e.which;
-        if(this.keysDown[keyCode]){
+        if (this.keysDown[keyCode]) {
             var midiNote = this.keysDown[keyCode];
             app.synth.noteOff(midiNote);
             this.keysDown[keyCode] = false;
@@ -119,7 +120,7 @@ var ui = {
 
     //-------------------
 
-    keyCodeToMidiNote: function(keyCode){
+    keyCodeToMidiNote: function (keyCode) {
 
         var mappings = {
             90: 0,
@@ -159,8 +160,8 @@ var ui = {
             222: 32
         };
 
-        if(mappings[keyCode] !== undefined){
-            var midiNote = mappings[keyCode] + (app.keyboardOctave*12);
+        if (mappings[keyCode] !== undefined) {
+            var midiNote = mappings[keyCode] + (app.keyboardOctave * 12);
             return midiNote;
         } else {
             return false;
@@ -170,19 +171,18 @@ var ui = {
 
     //----------------------
 
-    updateSynthVisualControls: function(){
+    updateSynthVisualControls: function () {
         var controls = app.synth.controls;
         var presetID = app.synth.currentPreset;
-        for(var i in controls){
+        for (var i in controls) {
 
-            if(controls[i].type == 'knob'){
-                var percentVal = Math.round( (controls[i].value / 127) * 100 );
+            if (controls[i].type == 'knob') {
+                var percentVal = Math.round((controls[i].value / 127) * 100);
                 $('.js-control-knob[data-control-id="' + i + '"]').val(percentVal);
-            }
-
-            else if(controls[i].type == 'radio'){
+            } else if (controls[i].type == 'radio') {
                 $('.js-control-radio-button[data-control-id="' + i + '"]').removeClass('btn-enabled');
-                $('.js-control-radio-button[data-control-id="' + i + '"][data-value="' + controls[i].value + '"]').addClass('btn-enabled');;
+                $('.js-control-radio-button[data-control-id="' + i + '"][data-value="' + controls[i].value + '"]').addClass('btn-enabled');
+                ;
             }
 
         }
