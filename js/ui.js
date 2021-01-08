@@ -9,44 +9,44 @@ var ui = {
 
     //-------------------
 
-    init: function(){
+    init: function () {
         this.eventListeners();
         this.handlebarsHelpers();
     },
 
     //-------------------
 
-    eventListeners: function(){
+    eventListeners: function () {
 
         var self = this;
 
         $(document)
 
-            .mousedown(function(){
+            .mousedown(function () {
                 self.mouseDown = true;
             })
-            .mouseup(function(){
+            .mouseup(function () {
                 self.mouseDown = false;
                 self.lastControlID = null;
                 self.dragStart = null;
             })
             //Mouse move
-            .mousemove(function(e){
+            .mousemove(function (e) {
                 self.mousePos = {x: e.pageX, y: e.pageY};
-                if(ui.lastControlID == null) return;
+                if (ui.lastControlID == null) return;
                 //Set knob pos
                 var vPos = e.clientY;
                 self.setKnobPos(vPos);
             })
 
-            .keydown(function(e){
+            .keydown(function (e) {
                 self.keyDown(e);
             })
-            .keyup(function(e){
+            .keyup(function (e) {
                 self.keyUp(e);
             })
 
-            .on('mousedown', '.js-control-knob', function(e){
+            .on('mousedown', '.js-control-knob', function (e) {
                 var controlID = $(this).data('control-id');
                 self.lastControlID = controlID;
                 self.dragStart = e.clientY;
@@ -64,7 +64,7 @@ var ui = {
             })
             */
 
-            .on('mousedown', '.js-control-radio-button', function(){
+            .on('mousedown', '.js-control-radio-button', function () {
                 console.log('radio click');
                 var controlID = $(this).data('control-id');
                 var value = $(this).data('value');
@@ -72,7 +72,7 @@ var ui = {
                 ui.updateSynthVisualControls();
             })
 
-            .on('mousedown', '.js-preset-select', function(){
+            .on('mousedown', '.js-preset-select', function () {
                 var presetID = $(this).data('preset-id');
                 app.synth.loadPreset(presetID);
                 ui.updateSynthVisualControls();
@@ -84,14 +84,14 @@ var ui = {
 
     //-------------
 
-    highlightPreset: function(presetID){
+    highlightPreset: function (presetID) {
         $('.preset-selected').removeClass('preset-selected');
         $('.js-preset-select[data-preset-id="' + presetID + '"]').addClass('preset-selected');
     },
 
     //-------------
 
-    handlebarsHelpers: function(){
+    handlebarsHelpers: function () {
 
         /*
 		Handlebars.registerHelper('simpleLoop', function(n, block) {
@@ -114,19 +114,20 @@ var ui = {
     //-------------------
 
     //Capture all press events
-    keyDown: function(e){
+    keyDown: function (e) {
         //e.preventDefault();
 
         var keyCode = e.which;
-        if(this.keysDown[keyCode]){
+        if (this.keysDown[keyCode]) {
             return;
         }
 
         var midiNote = this.keyCodeToMidiNote(keyCode);
 
         app.checkContext();
+        app.hideInstructions();
 
-        if(midiNote){
+        if (midiNote) {
             this.keysDown[keyCode] = midiNote;
             app.synth.noteOn(midiNote, 127);
         }
@@ -135,9 +136,9 @@ var ui = {
 
     //-------------------
 
-    keyUp: function(e){
+    keyUp: function (e) {
         var keyCode = e.which;
-        if(this.keysDown[keyCode]){
+        if (this.keysDown[keyCode]) {
             var midiNote = this.keysDown[keyCode];
             app.synth.noteOff(midiNote);
             this.keysDown[keyCode] = false;
@@ -146,7 +147,7 @@ var ui = {
 
     //-------------------
 
-    keyCodeToMidiNote: function(keyCode){
+    keyCodeToMidiNote: function (keyCode) {
 
         var mappings = {
             90: 0,
@@ -186,8 +187,8 @@ var ui = {
             222: 32
         };
 
-        if(mappings[keyCode] !== undefined){
-            var midiNote = mappings[keyCode] + (app.keyboardOctave*12);
+        if (mappings[keyCode] !== undefined) {
+            var midiNote = mappings[keyCode] + (app.keyboardOctave * 12);
             return midiNote;
         } else {
             return false;
@@ -197,13 +198,13 @@ var ui = {
 
     //----------------------
 
-    setKnobPos: function(vPos){
+    setKnobPos: function (vPos) {
 
         //Limit min and max vals
-        function limitVal(newVal){
-            if(newVal < 0){
+        function limitVal(newVal) {
+            if (newVal < 0) {
                 newVal = 0;
-            } else if(newVal > 127){
+            } else if (newVal > 127) {
                 newVal = 127;
             }
 
@@ -213,7 +214,7 @@ var ui = {
         var pointer = {y: vPos};
 
         //Set the drag start pos
-        if(!ui.mouseDown){
+        if (!ui.mouseDown) {
             ui.dragStart = pointer.y;
             ui.mouseDown = true;
         }
@@ -223,9 +224,9 @@ var ui = {
         var moveAmount = ui.dragNew - ui.dragStart;
 
         //Invert the value
-        if(moveAmount < 0){
+        if (moveAmount < 0) {
             moveAmount = Math.abs(moveAmount);
-        } else if(moveAmount > 0){
+        } else if (moveAmount > 0) {
             moveAmount = -Math.abs(moveAmount);
         }
 
@@ -245,15 +246,15 @@ var ui = {
 
     //----------------------
 
-    setKnobRotation: function(controlID, value){
+    setKnobRotation: function (controlID, value) {
 
-        var valPercent = Math.round( (value / 127) * 100 );
+        var valPercent = Math.round((value / 127) * 100);
 
         var rotAngle = (270 / 100) * valPercent - 135;
-        var css = { transition: 'transform 0s', transform: 'rotate(' + rotAngle + 'deg)' };
+        var css = {transition: 'transform 0s', transform: 'rotate(' + rotAngle + 'deg)'};
         var element = $('.js-control-knob[data-control-id="' + controlID + '"]');
 
-        if(element){
+        if (element) {
             element.css(css);
         }
 
@@ -261,17 +262,17 @@ var ui = {
 
     //----------------------
 
-    updateSynthVisualControls: function(){
+    updateSynthVisualControls: function () {
         var controls = app.synth.controls;
         var presetID = app.synth.currentPreset;
-        for(var i in controls){
+        for (var i in controls) {
 
-            if(controls[i].type == 'knob'){
+            if (controls[i].type == 'knob') {
                 this.setKnobRotation(i, controls[i].value);
-            }
-            else if(controls[i].type == 'radio'){
+            } else if (controls[i].type == 'radio') {
                 $('.js-control-radio-button[data-control-id="' + i + '"]').removeClass('btn-enabled');
-                $('.js-control-radio-button[data-control-id="' + i + '"][data-value="' + controls[i].value + '"]').addClass('btn-enabled');;
+                $('.js-control-radio-button[data-control-id="' + i + '"][data-value="' + controls[i].value + '"]').addClass('btn-enabled');
+                ;
             }
 
         }
