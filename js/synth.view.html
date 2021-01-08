@@ -1,7 +1,7 @@
 <style>
     .synth{
-        width:70vw;
-        height:35vw;
+        width:64vw;
+        height:31.6vw;
         background:
                 linear-gradient(90deg, rgba(0,0,0,0.15) 0%,  rgba(0,0,0,0.1) 2%, rgba(200, 200, 200, 0.1) 50%, rgba(0,0,0,0.1) 99%, rgba(0,0,0,0.15) 100%),
                 linear-gradient(#aaa 0%,  #fff 1%, #fff 80%, #fff 99%, #bbb 100%);
@@ -9,6 +9,7 @@
         box-shadow:rgba(0,0,0,0.1) 2px -10px 10px;
         padding:1vw;
         box-sizing:border-box;
+        position:relative;
     }
 
     .synth .knob-outer{
@@ -55,10 +56,12 @@
         margin:0.1vw;
         border:0.1vw solid #bbb;
         border-radius:8px;
+        width:30%;
     }
 
     .synth .control-section > div {
         display:flex;
+        justify-content:space-between;
         padding:0.5vw;
     }
 
@@ -66,6 +69,7 @@
         background:#333;
         color:#fff;
         padding:0.2vw;
+        text-align:center;
     }
 
     .synth .meter-container{
@@ -78,57 +82,125 @@
     }
 
     .synth .preset-container{
-        height:8vw;
+        position:relative;
+        height:100%;
         overflow-y:auto;
         background:linear-gradient(#8094af 0%, #c7eaff 30%, #c7eaff 60%, #adcbe7 70%, #a1bcd7 80%, #748ca4 100% );
         border:0.2vw solid #333;
         padding:0;
+        box-shadow:0 0px 20px 0px rgba(0,0,0,0.3);
+        height:14vw;
     }
 
     .synth .preset-container li{
         list-style: none;
         border-bottom:1px solid #305581;
         padding:0.2vw 0.5vw;
+        text-align:center;
     }
 
     .synth .preset-selected{
         background:#305581;
         color:#DDEEFF;
     }
+
+    .synth .presets-outer{
+        position:absolute;
+        left:50%;
+        top:1vw;
+        width:30%;
+        transform: translateX(-50%);
+        box-sizing:border-box;
+        padding:1vw;
+        border:1px solid white;
+    }
+
+    .synth .control-section-right{
+        position:absolute;
+        right:1vw;
+        top:1vw;
+        width:20vw;
+    }
+
+    .synth .lfo1{
+        position:absolute;
+        right:1vw;
+        top:1vw;
+    }
+
+    .synth .lfo2{
+        position:absolute;
+        right:1vw;
+        top:11.5vw;
+    }
+
+    .synth .control-bottom{
+        position:absolute;
+        bottom:1vw;
+        width:30%;
+    }
+
+    .synth .bottom-1{
+        left:1vw;
+    }
+
+    .synth .bottom-2{
+        right:1vw;
+    }
+
+    .synth .bottom-3{
+        left:50%;
+        transform:translateX(-50%);
+
+    }
+
+    .synth .title{
+        position:absolute;
+        font-size:2.8vw;
+        font-weight:bold;
+        color:#b71342;
+        left:50%;
+        bottom:29%;
+        transform:translateX(-50%);
+    }
 </style>
 
 
 <div id="" class="synth">
 
+    <div class="title">SLAVE-1</div>
+
     <div class="controls-container">
 
-        {{#each oscillators}}
-        <div class="ib control-section">
-            <h4>Oscillator {{this.id}}</h4>
-            <div>
+        <div class="">
+            {{#each oscillators}}
+            <div class="control-section ">
+                <h4>Oscillator {{this.id}}</h4>
                 <div>
-                    <label>Coarse</label><Br>
-                    <div class="knob-outer"><div class="knob-inner js-control-knob" data-control-id="{{this.tuneControlID}}"></div></div>
+                    <div>
+                        <label>Coarse</label><Br>
+                        <div class="knob-outer"><div class="knob-inner js-control-knob" data-control-id="{{this.tuneControlID}}"></div></div>
+                    </div>
+                    <div>
+                        <label>Fine Tune</label><Br>
+                        <div class="knob-outer"><div class="knob-inner js-control-knob" data-control-id="{{this.fineTuneControlID}}"></div></div>
+                    </div>
                 </div>
+                <br>
                 <div>
-                    <label>Fine Tune</label><Br>
-                    <div class="knob-outer"><div class="knob-inner js-control-knob" data-control-id="{{this.fineTuneControlID}}"></div></div>
+                    <label>Waveform</label>
+                    <div>
+                        <button class="js-control-radio-button" data-control-id="{{this.typeControlID}}" data-value="0">SAW</button>
+                        <button class="js-control-radio-button" data-control-id="{{this.typeControlID}}" data-value="1">SQR</button>
+                        <button class="js-control-radio-button" data-control-id="{{this.typeControlID}}" data-value="2">TRI</button>
+                        <button class="js-control-radio-button" data-control-id="{{this.typeControlID}}" data-value="3">SIN</button>
+                    </div>
                 </div>
-            </div>
-            <br>
-            <div>
-                <label>Waveform</label>
-                <div>
-                    <button class="js-control-radio-button" data-control-id="{{this.typeControlID}}" data-value="0">SAW</button>
-                    <button class="js-control-radio-button" data-control-id="{{this.typeControlID}}" data-value="1">SQR</button>
-                    <button class="js-control-radio-button" data-control-id="{{this.typeControlID}}" data-value="2">TRI</button>
-                    <button class="js-control-radio-button" data-control-id="{{this.typeControlID}}" data-value="3">SIN</button>
-                </div>
-            </div>
-        </div><br>
-        {{/each}}
+            </div><br>
+            {{/each}}
+        </div>
 
-        <div class="ib control-section">
+        <div class="control-section control-bottom bottom-1">
             <h4>Amp Envelope</h4>
             <div>
                 <div>
@@ -150,7 +222,7 @@
             </div>
         </div>
 
-        <div class="ib control-section">
+        <div class="control-section control-bottom bottom-2">
             <h4>Filter Envelope</h4>
             <div>
                 <div>
@@ -172,7 +244,7 @@
             </div>
         </div>
 
-        <div class="ib control-section">
+        <div class="control-section control-bottom bottom-3">
             <h4>Filter</h4>
             <div>
                 <div>
@@ -183,15 +255,10 @@
                     <label>Resonance</label><br>
                     <div class="knob-outer"><div class="knob-inner js-control-knob" data-control-id="9"></div></div>
                 </div>
-                <div>
-                    <label>Type</label><br>
-                    <button class="js-control-radio-button" data-control-id="10" data-value="0">LP</button>
-                    <button class="js-control-radio-button" data-control-id="10" data-value="127">HP</button>
-                </div>
             </div>
         </div>
 
-        <div class="ib control-section">
+        <div class="control-section presets-outer">
             <h4>Preset</h4>
             <ul class="preset-container">
                 {{#each presets}}
@@ -203,23 +270,25 @@
 
 
         {{#each lfos}}
-        <div class="ib control-section">
+        <div class="control-section lfo{{this.id}}">
             <h4>LFO {{this.id}}</h4>
             <div>
-                <label>Rate</label><Br>
-                <div class="knob-outer"><div class="knob-inner js-control-knob" data-control-id="{{this.rateControlID}}"></div></div>
-            </div>
-            <div>
-                <label>Amount</label><Br>
-                <div class="knob-outer"><div class="knob-inner js-control-knob" data-control-id="{{this.amountControlID}}"></div></div>
-            </div>
-            <div>
-                <label>Target</label>
-                <div>
-                    <button class="js-control-radio-button" data-control-id="{{this.targetControlID}}" data-value="0">Osc 1 Detune</button>
-                    <button class="js-control-radio-button" data-control-id="{{this.targetControlID}}" data-value="1">Osc 2 Detune</button>
-                    <button class="js-control-radio-button" data-control-id="{{this.targetControlID}}" data-value="2">Osc 1 &amp; 2 Detune</button>
-                    <button class="js-control-radio-button" data-control-id="{{this.targetControlID}}" data-value="3">Filter Cutoff</button>
+                <div class="ib">
+                    <label>Rate</label><br>
+                    <div class="knob-outer"><div class="knob-inner js-control-knob" data-control-id="{{this.rateControlID}}"></div></div>
+                </div>
+                <div class="ib">
+                    <label>Amount</label><br>
+                    <div class="knob-outer"><div class="knob-inner js-control-knob" data-control-id="{{this.amountControlID}}"></div></div>
+                </div>
+                <div class="ib" style="margin-left:8px;">
+                    <label>Target</label><br>
+                    <div>
+                        <button class="js-control-radio-button" data-control-id="{{this.targetControlID}}" data-value="0">Osc 1 Detune</button>
+                        <button class="js-control-radio-button" data-control-id="{{this.targetControlID}}" data-value="1">Osc 2 Detune</button>
+                        <button class="js-control-radio-button" data-control-id="{{this.targetControlID}}" data-value="2">Osc 1 &amp; 2 Detune</button>
+                        <button class="js-control-radio-button" data-control-id="{{this.targetControlID}}" data-value="3">Filter Cutoff</button>
+                    </div>
                 </div>
             </div>
             <div>
@@ -231,48 +300,10 @@
                     <button class="js-control-radio-button" data-control-id="{{this.shapeControlID}}" data-value="3">SIN</button>
                 </div>
             </div>
+
         </div>
         {{/each}}
 
     </div>
-
-    <div class="keyboard">
-        <div class="key key-white"></div>
-        <div class="key key-white"></div>
-        <div class="key key-white"></div>
-        <div class="key key-white"></div>
-        <div class="key key-white"></div>
-        <div class="key key-white"></div>
-        <div class="key key-white"></div>
-    </div>
-
-    <!--
-    <div class="meter-container">
-        <h2>Voice Gain Levels</h2>
-        <div>
-            <div class="js-voice-level voice-level-meter" data-id="0"><div></div></div>
-            <div class="js-voice-level voice-level-meter" data-id="1"><div></div></div>
-            <div class="js-voice-level voice-level-meter" data-id="2"><div></div></div>
-            <div class="js-voice-level voice-level-meter" data-id="3"><div></div></div>
-            <div class="js-voice-level voice-level-meter" data-id="4"><div></div></div>
-            <div class="js-voice-level voice-level-meter" data-id="5"><div></div></div>
-            <div class="js-voice-level voice-level-meter" data-id="6"><div></div></div>
-            <div class="js-voice-level voice-level-meter" data-id="7"><div></div></div>
-        </div>
-    </div>
-     <div class="meter-container">
-        <h2>Voice Filter Levels</h2>
-        <div>
-            <div class="js-voice-filter voice-filter-meter" data-id="0"><div></div></div>
-            <div class="js-voice-filter voice-filter-meter" data-id="1"><div></div></div>
-            <div class="js-voice-filter voice-filter-meter" data-id="2"><div></div></div>
-            <div class="js-voice-filter voice-filter-meter" data-id="3"><div></div></div>
-            <div class="js-voice-filter voice-filter-meter" data-id="4"><div></div></div>
-            <div class="js-voice-filter voice-filter-meter" data-id="5"><div></div></div>
-            <div class="js-voice-filter voice-filter-meter" data-id="6"><div></div></div>
-            <div class="js-voice-filter voice-filter-meter" data-id="7"><div></div></div>
-        </div>
-    </div>
-    -->
 
 </div>

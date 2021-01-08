@@ -9,8 +9,8 @@ body{
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    user-select: none;
-    background:linear-gradient(180deg, #eee 0%, #fff 100%);
+    /*background:linear-gradient(180deg, #eee 0%, #fff 100%);*/
+    background:linear-gradient(180deg, #000 0%, #333 100%);
 }
 
 .instruments-container{

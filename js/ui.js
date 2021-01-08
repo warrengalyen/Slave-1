@@ -117,8 +117,6 @@ var ui = {
     keyDown: function(e){
         //e.preventDefault();
 
-        console.log(e.which);
-
         var keyCode = e.which;
         if(this.keysDown[keyCode]){
             return;
