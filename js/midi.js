@@ -70,11 +70,12 @@ var midi = {
         console.log(controlID);
 
         //Only continues controllers allowed
-        if(controlType == 144){
+        if(controlType === 144) {
+            app.checkContext();
             app.synth.noteOn(controlID);
         }
 
-        else if(controlType == 128){
+        else if(controlType === 128){
             app.synth.noteOff(controlID);
         }
 
